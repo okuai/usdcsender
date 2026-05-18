@@ -1186,6 +1186,32 @@ button:disabled {
   gap: 14px;
 }
 
+.history-pagination {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.history-page-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.history-page-actions strong {
+  color: var(--text-strong);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.35;
+  min-width: 54px;
+  text-align: center;
+}
+
 .history-list {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -1721,6 +1747,11 @@ button:disabled {
   .history-search {
     margin-left: 0;
     max-width: none;
+  }
+
+  .history-pagination {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .address-book-grid {

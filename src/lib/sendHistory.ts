@@ -56,8 +56,12 @@ export async function deleteSendHistoryRecord(id: string) {
 
 export function sortSendHistory(records: SendHistoryRecord[]) {
   return [...records].sort((left, right) =>
-    right.updatedAt.localeCompare(left.updatedAt),
+    getSendHistorySortValue(right).localeCompare(getSendHistorySortValue(left)),
   )
+}
+
+function getSendHistorySortValue(record: SendHistoryRecord) {
+  return record.updatedAt || record.createdAt || ''
 }
 
 function openSendHistoryDb() {

@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   BookOpen,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   CircleDollarSign,
   Download,
@@ -94,6 +96,7 @@ type ChainListFilter = 'mainnets' | 'testnets' | 'all'
 const progressStorageKey = 'usdc-sender.progress.v1'
 const addressStorageKey = 'usdc-sender.batch-addresses.v1'
 const recipientsStorageKey = 'usdc-sender.recipients.v1'
+const sendHistoryPageSize = 10
 const batchDistributorRuntimeBytecodeHash =
   '0x41f19b00b24bd5a51a24f9dc482eacfd54822f6a6c0f923864c5651e376e6be8'
 const usdcLogoUrl =
@@ -631,6 +634,7 @@ function App() {
     }
 
     let txHash: Hex | undefined
+    let sendHistoryId: string | undefined
 
     try {
       setOperationMessage(`${chain.name} batch ${batch.index} preparing to send`)
@@ -645,10 +649,6 @@ function App() {
       })) as bigint
 
       if (allowanceRaw < batch.totalRaw) {
-        upsertSendHistoryFromBatch(batch, {
-          error: 'Insufficient allowance',
-          status: 'failed',
-        })
         setOperationMessage(`${chain.name} allowance is insufficient`)
         return
       }
@@ -660,15 +660,20 @@ function App() {
         chainId: toSupportedChainId(chain.id),
         functionName: 'batchTransferFrom',
       })
+      sendHistoryId = createSendHistoryId(batch.chainSlug, txHash)
 
       setBatchState(batch.id, {
         status: 'pending',
         txHash,
       })
-      upsertSendHistoryFromBatch(batch, {
-        status: 'pending',
-        txHash,
-      })
+      upsertSendHistoryFromBatch(
+        batch,
+        {
+          status: 'pending',
+          txHash,
+        },
+        sendHistoryId,
+      )
       setOperationMessage(`${chain.name} batch ${batch.index} confirming`)
 
       const receipt = await waitForTransactionReceipt(wagmiConfig, {
@@ -677,29 +682,70 @@ function App() {
       })
 
       if (receipt.status === 'reverted') {
-        throw new Error('Transaction reverted')
+        const errorMessage = 'Transaction reverted'
+
+        setBatchState(batch.id, {
+          error: errorMessage,
+          status: 'failed',
+          txHash,
+        })
+        upsertSendHistoryFromBatch(
+          batch,
+          {
+            error: errorMessage,
+            status: 'failed',
+            txHash,
+          },
+          sendHistoryId,
+        )
+        setOperationMessage(errorMessage)
+        return
       }
 
       setBatchState(batch.id, {
         status: 'sent',
         txHash,
       })
-      upsertSendHistoryFromBatch(batch, {
-        status: 'sent',
-        txHash,
-      })
+      upsertSendHistoryFromBatch(
+        batch,
+        {
+          status: 'sent',
+          txHash,
+        },
+        sendHistoryId,
+      )
       setOperationMessage(`${chain.name} batch ${batch.index} sent`)
       await refreshGroup(batch.chainSlug)
     } catch (error) {
       const errorMessage = getErrorMessage(error)
+
+      if (txHash) {
+        const confirmationError = `Confirmation check failed: ${errorMessage}`
+
+        setBatchState(batch.id, {
+          error: confirmationError,
+          status: 'pending',
+          txHash,
+        })
+        sendHistoryId ??= createSendHistoryId(batch.chainSlug, txHash)
+        upsertSendHistoryFromBatch(
+          batch,
+          {
+            error: confirmationError,
+            status: 'pending',
+            txHash,
+          },
+          sendHistoryId,
+        )
+        setOperationMessage(
+          `${chain.name} batch ${batch.index} submitted; confirmation check failed`,
+        )
+        return
+      }
+
       setBatchState(batch.id, {
         error: errorMessage,
         status: 'failed',
-      })
-      upsertSendHistoryFromBatch(batch, {
-        error: errorMessage,
-        status: 'failed',
-        txHash,
       })
       setOperationMessage(errorMessage)
     }
@@ -774,9 +820,9 @@ function App() {
       Partial<
         Pick<SendHistoryRecord, 'error' | 'sender' | 'txHash'>
       >,
+    id: string,
   ) {
     const now = new Date().toISOString()
-    const id = createSendHistoryId(batch)
     const current = sendHistoryRef.current
     const existing = current.find((record) => record.id === id)
     const next: SendHistoryRecord = {
@@ -824,9 +870,9 @@ function App() {
           record.status,
           getChainConfig(record.chainSlug).name,
           record.batchId,
-          record.batchIndex.toString(),
-          record.recipientCount.toString(),
-          formatUsdc(BigInt(record.totalRaw)),
+          String(record.batchIndex ?? ''),
+          String(record.recipientCount ?? ''),
+          formatSendHistoryTotal(record.totalRaw),
           record.sender ?? '',
           record.txHash ?? '',
           record.error ?? '',
@@ -1973,11 +2019,16 @@ function SendHistorySection({
   onExportRecord: (record: SendHistoryRecord) => void
 }) {
   const [historyQuery, setHistoryQuery] = useState('')
+  const [historyPage, setHistoryPage] = useState(1)
   const normalizedHistoryQuery = historyQuery.trim().toLowerCase()
+  const sortedRecords = useMemo(
+    () => sortSendHistory(records),
+    [records],
+  )
   const filteredRecords = useMemo(
     () =>
       normalizedHistoryQuery
-        ? records.filter((record) =>
+        ? sortedRecords.filter((record) =>
             [
               getChainConfig(record.chainSlug).name,
               getStatusLabel(record.status),
@@ -1989,8 +2040,25 @@ function SendHistorySection({
               .toLowerCase()
               .includes(normalizedHistoryQuery),
           )
-        : records,
-    [normalizedHistoryQuery, records],
+        : sortedRecords,
+    [normalizedHistoryQuery, sortedRecords],
+  )
+  const historyPageCount = Math.max(
+    1,
+    Math.ceil(filteredRecords.length / sendHistoryPageSize),
+  )
+  const currentHistoryPage = Math.min(historyPage, historyPageCount)
+  const pagedRecords = filteredRecords.slice(
+    (currentHistoryPage - 1) * sendHistoryPageSize,
+    currentHistoryPage * sendHistoryPageSize,
+  )
+  const visibleStart =
+    filteredRecords.length === 0
+      ? 0
+      : (currentHistoryPage - 1) * sendHistoryPageSize + 1
+  const visibleEnd = Math.min(
+    currentHistoryPage * sendHistoryPageSize,
+    filteredRecords.length,
   )
 
   return (
@@ -2011,7 +2079,10 @@ function SendHistorySection({
             placeholder="Search batch / tx / status"
             type="search"
             value={historyQuery}
-            onChange={(event) => setHistoryQuery(event.target.value)}
+            onChange={(event) => {
+              setHistoryQuery(event.target.value)
+              setHistoryPage(1)
+            }}
           />
         </label>
       </div>
@@ -2032,21 +2103,23 @@ function SendHistorySection({
                 <span>Tx</span>
                 <span>Actions</span>
               </div>
-              {filteredRecords.map((record) => {
+              {pagedRecords.map((record) => {
                 const chain = getChainConfig(record.chainSlug)
 
                 return (
                   <div className="history-result-row" key={record.id}>
                     <span className="history-transfer">
-                      <strong>Batch {record.batchIndex}</strong>
-                      <small>{chain.shortName} / {shortAddress(record.batchId)}</small>
+                      <strong>Batch {record.batchIndex ?? '-'}</strong>
+                      <small>
+                        {chain.shortName} / {record.batchId ? shortAddress(record.batchId) : '-'}
+                      </small>
                     </span>
                     <span className="history-time">
                       {formatSendHistoryTime(record.updatedAt)}
                     </span>
-                    <span className="history-count">{record.recipientCount}</span>
+                    <span className="history-count">{record.recipientCount ?? '-'}</span>
                     <span className="history-total">
-                      {formatUsdc(BigInt(record.totalRaw))} USDC
+                      {formatSendHistoryTotal(record.totalRaw)} USDC
                     </span>
                     <span
                       className={`status-badge ${getStatusBadgeClass(record.status)}`}
@@ -2093,6 +2166,38 @@ function SendHistorySection({
             </div>
           )}
       </div>
+      {filteredRecords.length > sendHistoryPageSize ? (
+        <div className="history-pagination">
+          <span>
+            {visibleStart}-{visibleEnd} of {filteredRecords.length}
+          </span>
+          <div className="history-page-actions">
+            <button
+              type="button"
+              className="icon-button"
+              disabled={currentHistoryPage <= 1}
+              onClick={() => setHistoryPage(Math.max(1, currentHistoryPage - 1))}
+              title="Previous page"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <strong>
+              {currentHistoryPage} / {historyPageCount}
+            </strong>
+            <button
+              type="button"
+              className="icon-button"
+              disabled={currentHistoryPage >= historyPageCount}
+              onClick={() =>
+                setHistoryPage(Math.min(historyPageCount, currentHistoryPage + 1))
+              }
+              title="Next page"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -2334,7 +2439,11 @@ function formatBookUpdatedAt(value: string) {
   })
 }
 
-function formatSendHistoryTime(value: string) {
+function formatSendHistoryTime(value?: string) {
+  if (!value) {
+    return '-'
+  }
+
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
@@ -2353,6 +2462,14 @@ function formatSendHistoryTime(value: string) {
   ].join(':')
 
   return `${datePart} ${timePart}`
+}
+
+function formatSendHistoryTotal(value?: string) {
+  if (!value || !/^\d+$/.test(value)) {
+    return '-'
+  }
+
+  return formatUsdc(BigInt(value))
 }
 
 function getStatusLabel(status: BatchStatus) {
@@ -2381,10 +2498,8 @@ function getStatusBadgeClass(status: BatchStatus) {
   }
 }
 
-function createSendHistoryId(
-  batch: PreparedBatch,
-) {
-  return batch.batchId
+function createSendHistoryId(chainSlug: ChainSlug, txHash: Hex) {
+  return `${chainSlug}:${txHash}`
 }
 
 async function getBatchContractError(
