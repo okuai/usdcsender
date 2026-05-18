@@ -1584,7 +1584,7 @@ function ChainSelector({
         <div className="chain-selector-menu" role="listbox">
           <div className="chain-selector-menu-header">
             <span>
-              {appChains.length} Circle USDC chains / CreateX{' '}
+              {appChains.length} deployed USDC networks / CreateX{' '}
               {shortAddress(createxFactoryAddress)}
             </span>
             <strong>
@@ -1694,7 +1694,7 @@ function getChainFilterLabel(filter: ChainListFilter) {
     return 'Testnet USDC networks'
   }
 
-  return 'All Circle USDC networks'
+  return 'All deployed USDC networks'
 }
 
 function getPreferredChainListFilter(chain: (typeof appChains)[number]) {

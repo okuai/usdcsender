@@ -65,7 +65,7 @@ Each batch run is limited to one selected blockchain network. Recipients do not 
 If the input has more than 100 recipients, the DApp automatically splits it into multiple batches of at most 100 recipients each.
 Batching is a frontend concern: each frontend batch gets a local `batchId` and is sent as one contract transaction.
 
-The chain selector is generated from the local Circle USDC chain registry in `src/config/chains.ts`. Chains without a USDC token address are not shown.
+The chain selector is generated from the deployed Batch contract table in `src/config/chains.ts`. Chains without both a USDC token address and a Batch contract address are hidden until the Batch contract is deployed and configured.
 
 Amounts are parsed as USDC with 6 decimals.
 
@@ -99,4 +99,4 @@ npm run compile:contracts
 npm run deploy:batch:createx -- --network <network>
 ```
 
-The frontend chain selector lists every supported USDC chain with its chain ID, USDC address, configured batch contract address, and bytecode-check status. Refreshing a chain validates the configured batch contract bytecode before approving or sending.
+The frontend chain selector lists every deployed USDC chain with its chain ID, USDC address, configured batch contract address, and bytecode-check status. Refreshing a chain validates the configured batch contract bytecode before approving or sending.

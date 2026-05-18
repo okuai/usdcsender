@@ -333,7 +333,7 @@ function createAppChains(): ChainConfig[] {
         wagmiChain: chain,
       }
     },
-  ).filter((chain) => Boolean(chain.usdcAddress))
+  ).filter((chain) => Boolean(chain.usdcAddress && chain.batchAddress))
 }
 
 function resolveChainIconUrl(chainId: number) {
