@@ -1449,8 +1449,22 @@ function App() {
       ) : null}
 
       <footer className="status-bar">
-        <span>{operationMessage || 'Ready'}</span>
-        <span>{`${selectedSummary.chain.shortName} / ${blockingIssues.length} errors`}</span>
+        <span className="status-bar-message">{operationMessage || 'Ready'}</span>
+        <span className="status-bar-meta">
+          <span>{`${selectedSummary.chain.shortName} / ${blockingIssues.length} errors`}</span>
+          <a
+            aria-label="Open USDC Sender on GitHub"
+            className="status-github-link"
+            href="https://github.com/okuai/usdcsender"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Open USDC Sender on GitHub"
+          >
+            <svg aria-hidden="true" className="status-github-icon">
+              <use href="/icons.svg#github-icon" />
+            </svg>
+          </a>
+        </span>
       </footer>
     </main>
   )

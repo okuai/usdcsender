@@ -1614,6 +1614,56 @@ button:disabled {
   position: sticky;
 }
 
+.status-bar-message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-bar-meta {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.status-github-link {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 30px;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+  width: 30px;
+}
+
+.status-github-link:hover,
+.status-github-link:focus-visible {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  box-shadow: 0 5px 14px rgba(20, 116, 111, 0.12);
+}
+
+.status-github-link:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.status-github-icon {
+  height: 17px;
+  width: 17px;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }
