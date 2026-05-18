@@ -129,6 +129,7 @@ function App() {
   const [sendHistory, setSendHistory] = useState<SendHistoryRecord[]>([])
   const [selectedChainSlug, setSelectedChainSlug] =
     useState<ChainSlug>(defaultChainSlug)
+  const selectedChainSlugRef = useRef<ChainSlug>(selectedChainSlug)
   const [csvText, setCsvText] = useState(() =>
     loadJson(recipientsStorageKey, ''),
   )
@@ -250,11 +251,16 @@ function App() {
   }, [csvText])
 
   const changeSelectedNetwork = useCallback((slug: ChainSlug) => {
+    selectedChainSlugRef.current = slug
     setSelectedChainSlug(slug)
     setSelectedAddressBookId('')
     setAddressBookName('')
     setSendAddressBookName('')
   }, [])
+
+  useEffect(() => {
+    selectedChainSlugRef.current = selectedChainSlug
+  }, [selectedChainSlug])
 
   useEffect(() => {
     if (!account.isConnected || !account.chainId || networkSwitching) {
@@ -264,7 +270,13 @@ function App() {
     const connectedChain = getChainConfigById(account.chainId)
 
     if (connectedChain && connectedChain.slug !== selectedChainSlug) {
-      changeSelectedNetwork(connectedChain.slug)
+      selectedChainSlugRef.current = connectedChain.slug
+
+      const timeoutId = window.setTimeout(() => {
+        changeSelectedNetwork(connectedChain.slug)
+      }, 0)
+
+      return () => window.clearTimeout(timeoutId)
     }
   }, [
     account.chainId,
@@ -335,14 +347,6 @@ function App() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!selectedAddressBook) {
-      return
-    }
-
-    setAddressBookName(selectedAddressBook.name)
-  }, [selectedAddressBook])
-
   const hasRows = activeRows.length > 0
   const canExecute =
     account.isConnected &&
@@ -368,7 +372,9 @@ function App() {
         ...current,
         [slug]: { ...current[slug], error: message, loading: false },
       }))
-      setOperationMessage(message)
+      if (selectedChainSlugRef.current === slug) {
+        setOperationMessage(message)
+      }
       return
     }
 
@@ -409,17 +415,23 @@ function App() {
           loading: false,
         },
       }))
-      setOperationMessage(`${chain.name} refreshed`)
+      if (selectedChainSlugRef.current === slug) {
+        setOperationMessage(`${chain.name} refreshed`)
+      }
     } catch (error) {
+      const message = getErrorMessage(error)
+
       setRuntimeBySlug((current) => ({
         ...current,
         [slug]: {
           ...current[slug],
-          error: getErrorMessage(error),
+          error: message,
           loading: false,
         },
       }))
-      setOperationMessage(getErrorMessage(error))
+      if (selectedChainSlugRef.current === slug) {
+        setOperationMessage(message)
+      }
     }
   }, [account.address, addressOverrides])
 
@@ -428,7 +440,11 @@ function App() {
       return
     }
 
-    void refreshGroup(selectedChainSlug)
+    const timeoutId = window.setTimeout(() => {
+      void refreshGroup(selectedChainSlug)
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
   }, [account.address, account.isConnected, refreshGroup, selectedChainSlug])
 
   async function ensureSufficientAllowance(slug: ChainSlug, requiredRaw: bigint) {
@@ -917,7 +933,12 @@ function App() {
     setAddressBooks(books)
 
     if (selectId !== undefined) {
+      const selectedBook = books.find((book) => book.id === selectId)
+
       setSelectedAddressBookId(selectId)
+      if (selectedBook) {
+        setAddressBookName(selectedBook.name)
+      }
       return
     }
 
@@ -1090,8 +1111,8 @@ function App() {
   }
 
   function loadAddressBookForSending(book: AddressBookRecord) {
+    changeSelectedNetwork(book.chainSlug)
     setSelectedAddressBookId(book.id)
-    setSelectedChainSlug(book.chainSlug)
     setActiveTab('send')
     setCsvText(addressBookToCsv(book))
     setBatchStates({})
