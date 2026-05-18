@@ -16,6 +16,10 @@
     <meta name="application-name" content="USDC Sender" />
     <meta name="apple-mobile-web-app-title" content="USDC Sender" />
     <meta name="author" content="USDC Sender" />
+    <meta
+      name="ai-summary"
+      content="USDC Sender is a non-custodial EVM web app for batch USDC payouts from address,amount CSV rows on configured chains including Ethereum, Base, Arbitrum One, and Ink."
+    />
     <meta name="robots" content="index,follow" />
     <meta
       name="googlebot"
@@ -25,6 +29,19 @@
     <link rel="canonical" href="https://usdcsender.xyz/" />
     <link rel="alternate" hreflang="en" href="https://usdcsender.xyz/" />
     <link rel="alternate" hreflang="x-default" href="https://usdcsender.xyz/" />
+    <link rel="alternate" type="text/plain" title="LLM context index" href="/llms.txt" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      title="Full LLM context for USDC Sender"
+      href="/llms-full.txt"
+    />
+    <link
+      rel="alternate"
+      type="text/markdown"
+      title="AI context for USDC Sender"
+      href="/ai-context.md"
+    />
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
@@ -54,33 +71,128 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "USDC Sender",
-        "alternateName": ["USDCSender", "USDC Batch Sender"],
-        "url": "https://usdcsender.xyz/",
-        "image": "https://usdcsender.xyz/og-image.svg",
-        "inLanguage": "en",
-        "applicationCategory": "FinanceApplication",
-        "operatingSystem": "Web",
-        "description": "Send USDC to multiple EVM addresses in one workflow. Import recipients, approve USDC, execute batch payouts, and track transactions across supported chains.",
-        "keywords": "USDC sender, USDC batch payments, USDC payouts, EVM USDC, stablecoin payments",
-        "featureList": [
-          "Import recipient lists",
-          "Approve USDC spending",
-          "Send USDC to multiple EVM addresses",
-          "Track payout transactions"
-        ],
-        "isAccessibleForFree": true,
-        "publisher": {
-          "@type": "Organization",
-          "name": "USDC Sender",
-          "url": "https://usdcsender.xyz/"
-        },
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://usdcsender.xyz/#website",
+            "name": "USDC Sender",
+            "url": "https://usdcsender.xyz/",
+            "inLanguage": "en",
+            "publisher": {
+              "@id": "https://usdcsender.xyz/#organization"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://usdcsender.xyz/#organization",
+            "name": "USDC Sender",
+            "url": "https://usdcsender.xyz/",
+            "logo": "https://usdcsender.xyz/favicon.svg",
+            "sameAs": ["https://github.com/okuai/usdcsender"]
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://usdcsender.xyz/#webpage",
+            "url": "https://usdcsender.xyz/",
+            "name": "USDC Sender | Batch USDC Payments for EVM Wallets",
+            "description": "Send USDC to multiple EVM addresses in one workflow. Import recipients, approve USDC, execute batch payouts, and track transactions across supported chains.",
+            "inLanguage": "en",
+            "isPartOf": {
+              "@id": "https://usdcsender.xyz/#website"
+            },
+            "mainEntity": {
+              "@id": "https://usdcsender.xyz/#app"
+            },
+            "about": [
+              {
+                "@type": "Thing",
+                "name": "USDC batch payments"
+              },
+              {
+                "@type": "Thing",
+                "name": "EVM stablecoin payouts"
+              },
+              {
+                "@type": "Thing",
+                "name": "Multi-recipient USDC transfers"
+              }
+            ]
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://usdcsender.xyz/#app",
+            "name": "USDC Sender",
+            "alternateName": ["USDCSender", "USDC Batch Sender"],
+            "url": "https://usdcsender.xyz/",
+            "image": "https://usdcsender.xyz/og-image.svg",
+            "screenshot": "https://usdcsender.xyz/og-image.svg",
+            "mainEntityOfPage": {
+              "@id": "https://usdcsender.xyz/#webpage"
+            },
+            "inLanguage": "en",
+            "applicationCategory": "FinanceApplication",
+            "applicationSubCategory": "Stablecoin payment utility",
+            "operatingSystem": "Web",
+            "browserRequirements": "Modern browser with JavaScript and an EVM wallet.",
+            "permissions": "Requires wallet connection and user-signed USDC approval or transfer transactions.",
+            "description": "USDC Sender is a non-custodial EVM web app for batch USDC payouts from address,amount CSV rows on configured chains including Ethereum, Base, Arbitrum One, and Ink.",
+            "keywords": "USDC sender, batch USDC payments, bulk USDC payouts, multi recipient USDC transfers, stablecoin payout tool, address amount CSV, EVM USDC",
+            "featureList": [
+              "Import address,amount CSV recipient lists",
+              "Validate EVM recipient addresses and USDC amounts",
+              "Approve USDC spending from a connected wallet",
+              "Send USDC to multiple EVM addresses in batch transactions",
+              "Split large recipient lists into smaller transaction groups",
+              "Track payout transactions in local browser history"
+            ],
+            "audience": {
+              "@type": "Audience",
+              "audienceType": "EVM wallet users, stablecoin payout operators, crypto teams, DAO operators, and businesses sending USDC to multiple addresses"
+            },
+            "isAccessibleForFree": true,
+            "publisher": {
+              "@id": "https://usdcsender.xyz/#organization"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "potentialAction": {
+              "@type": "UseAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://usdcsender.xyz/"
+              }
+            },
+            "softwareHelp": {
+              "@type": "CreativeWork",
+              "name": "USDC Sender AI context",
+              "url": "https://usdcsender.xyz/ai-context.md"
+            },
+            "subjectOf": [
+              {
+                "@type": "CreativeWork",
+                "name": "USDC Sender llms.txt",
+                "url": "https://usdcsender.xyz/llms.txt",
+                "encodingFormat": "text/plain"
+              },
+              {
+                "@type": "CreativeWork",
+                "name": "USDC Sender AI context",
+                "url": "https://usdcsender.xyz/ai-context.md",
+                "encodingFormat": "text/markdown"
+              },
+              {
+                "@type": "CreativeWork",
+                "name": "USDC Sender full LLM context",
+                "url": "https://usdcsender.xyz/llms-full.txt",
+                "encodingFormat": "text/plain"
+              }
+            ],
+            "sameAs": ["https://github.com/okuai/usdcsender"]
+          }
+        ]
       }
     </script>
 
