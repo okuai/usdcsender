@@ -9,6 +9,7 @@ import {
   Download,
   ExternalLink,
   FileCheck2,
+  FileCode2,
   Loader2,
   Pencil,
   RefreshCcw,
@@ -1342,7 +1343,7 @@ function App() {
                     : 'not configured'}
                 </span>
                 <span>
-                  <ChainLogoIcon chain={selectedSummary.chain} size="sm" />
+                  <FileCode2 size={15} />
                   Contract{' '}
                   {selectedSummary.contractAddress
                     ? shortAddress(selectedSummary.contractAddress)
