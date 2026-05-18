@@ -560,14 +560,22 @@
   width: 22px;
 }
 
-.circle-logo-sm,
-.chain-logo-sm {
+.circle-logo-sm {
   height: 18px;
   width: 18px;
 }
 
+.chain-logo-sm {
+  height: 22px;
+  width: 22px;
+}
+
+.chain-logo-sm.has-image {
+  padding: 1px;
+}
+
 .chain-logo-sm.fallback {
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .protocol-hero {
