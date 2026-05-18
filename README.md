@@ -26,9 +26,8 @@ Use the Vite build output directly:
 - Build command: `npm run build`
 - Build output directory: `dist`
 - Node.js version: `22.16.0` (pinned by `.node-version`)
-- Production environment variable: `VITE_REOWN_PROJECT_ID`
 
-Do not add `DEPLOYER_PRIVATE_KEY` or RPC URL variables to Cloudflare Pages. Those are only needed locally when deploying contracts. The Batch contract and USDC token addresses used by the website are built into `src/config/chains.ts`.
+Do not add `DEPLOYER_PRIVATE_KEY` or RPC URL variables to Cloudflare Pages. Those are only needed locally when deploying contracts. The Reown AppKit project ID is a public frontend constant in `src/config/constants.ts`; the Batch contract and USDC token addresses used by the website are built into `src/config/chains.ts`.
 
 The `public/_headers` file is copied into `dist` during `npm run build` and adds safe browser security headers plus long-lived caching for hashed Vite assets. The app does not require a Cloudflare Pages `_redirects` file.
 
@@ -63,7 +62,7 @@ USDC addresses for Circle-listed EVM mainnets and testnets are also built in fro
 
 https://developers.circle.com/stablecoins/usdc-contract-addresses
 
-`VITE_REOWN_PROJECT_ID` is required for Reown AppKit WalletConnect support.
+The Reown AppKit project ID used for WalletConnect support is built into `src/config/constants.ts`.
 
 ## Recipients
 

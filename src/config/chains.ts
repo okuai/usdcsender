@@ -49,6 +49,8 @@ import { http } from 'wagmi'
 import { defineChain, isAddress } from 'viem'
 import type { Address } from 'viem'
 
+import { reownProjectId } from './constants'
+
 export type ChainSlug = string
 type NumericAppKitNetwork = AppKitNetwork & { id: number }
 
@@ -70,7 +72,6 @@ type ChainConfig = {
   wagmiChain: NumericAppKitNetwork
 }
 
-const reownProjectId = import.meta.env.VITE_REOWN_PROJECT_ID ?? ''
 const appUrl = 'https://usdcsender.xyz'
 const reownAssetBaseUrl = 'https://api.web3modal.org/public/getAssetImage'
 const batchDistributorAddressByChainId: Record<number, Address> = {
