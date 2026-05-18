@@ -825,7 +825,7 @@ function App() {
 
   function clearProgress() {
     setBatchStates({})
-    setOperationMessage('Send status reset')
+    setOperationMessage('Batch status reset')
   }
 
   function upsertSendHistoryFromBatch(
@@ -1372,7 +1372,7 @@ function App() {
                   disabled={Object.keys(batchStates).length === 0}
                   onClick={clearProgress}
                 >
-                  Reset Send Status
+                  Reset Batch Status
                 </button>
               </div>
             </div>
