@@ -1,0 +1,19 @@
+{
+  "name": "USDCSender - USDC Batch Sender",
+  "short_name": "USDCSender",
+  "description": "Send USDC to multiple EVM addresses in one focused batch payout workflow.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#14746f",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
