@@ -141,9 +141,9 @@
 }
 
 .chain-selector {
-  min-width: 320px;
+  min-width: 0;
   position: relative;
-  width: 360px;
+  width: clamp(270px, 24vw, 310px);
   z-index: 20;
 }
 
@@ -153,8 +153,8 @@
   box-shadow: 0 8px 20px rgba(20, 116, 111, 0.1);
   height: auto;
   justify-content: space-between;
-  min-height: 54px;
-  padding: 8px 10px;
+  min-height: 50px;
+  padding: 7px 9px;
   text-align: left;
   white-space: normal;
   width: 100%;
@@ -173,6 +173,7 @@
 
 .chain-selector-trigger-main,
 .chain-option-main {
+  flex: 1 1 auto;
   gap: 10px;
   min-width: 0;
 }
@@ -204,8 +205,8 @@
 }
 
 .chain-selector-right {
-  gap: 8px;
-  margin-left: 10px;
+  gap: 6px;
+  margin-left: 8px;
 }
 
 .chain-selector-chain-id {
@@ -233,14 +234,14 @@
   border-radius: 8px;
   box-shadow: var(--shadow);
   display: grid;
-  gap: 8px;
+  gap: 7px;
   grid-template-rows: auto auto auto auto minmax(0, 1fr);
   max-height: min(620px, calc(100svh - 112px));
-  padding: 10px;
+  padding: 9px;
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  width: min(540px, calc(100vw - 32px));
+  width: min(430px, calc(100vw - 32px));
 }
 
 .chain-selector-menu-header {
@@ -385,12 +386,12 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   grid-template-columns: minmax(0, 1fr) auto;
   height: auto;
   justify-content: stretch;
-  min-height: 58px;
-  padding: 9px 10px;
+  min-height: 54px;
+  padding: 8px 9px;
   text-align: left;
   white-space: normal;
   width: 100%;
@@ -441,7 +442,7 @@
 
 .chain-option-status {
   align-self: center;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
   min-width: 0;
 }
