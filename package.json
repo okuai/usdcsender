@@ -11,7 +11,8 @@
     "deploy:batch": "hardhat run scripts/deploy-batch.ts",
     "deploy:batch:createx": "hardhat run scripts/deploy-batch-createx.ts",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@reown/appkit": "^1.8.19",
@@ -27,6 +28,7 @@
     "@actions/http-client": "^4.0.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.37.1",
     "@eslint/js": "^10.0.1",
     "@nomicfoundation/hardhat-node-test-runner": "^3.0.15",
     "@nomicfoundation/hardhat-viem": "^3.0.7",
@@ -43,6 +45,7 @@
     "hardhat": "^3.4.5",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "wrangler": "^4.92.0"
   }
 }
