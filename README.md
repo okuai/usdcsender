@@ -20,40 +20,34 @@ npm run dev
 
 ## Deploy Batch Contract
 
-Set the matching RPC URL and `DEPLOYER_PRIVATE_KEY` in `.env`, then run one deploy per target network. The repo includes deployment targets for the current testnet validation set; add more networks to `hardhat.config.ts` before deploying there.
+Set the matching RPC URL and `DEPLOYER_PRIVATE_KEY` in `.env`, then run one deploy per target network. Mainnet targets are configured for Ethereum, Base, Ink, and Arbitrum One, plus the testnet validation set.
 
 ```bash
-npm run deploy:batch -- --network arcTestnet
-npm run deploy:batch -- --network baseSepolia
-npm run deploy:batch -- --network ethereumSepolia
+npm run deploy:batch:createx -- --network ethereum
+npm run deploy:batch:createx -- --network base
+npm run deploy:batch:createx -- --network ink
+npm run deploy:batch:createx -- --network arbitrumOne
+npm run deploy:batch:createx -- --network arcTestnet
+npm run deploy:batch:createx -- --network baseSepolia
+npm run deploy:batch:createx -- --network ethereumSepolia
 ```
 
-With CreateX deterministic deployment, set the shared address once:
+Batch contract addresses are built into `src/config/chains.ts` by numeric chain ID. Update `batchDistributorAddressByChainId` after deploying a supported network.
 
-```bash
-VITE_REOWN_PROJECT_ID=...
-VITE_BATCH_DISTRIBUTOR_ADDRESS=0x...
-```
+Current configured deployments:
 
-For a non-deterministic or temporary deploy, set per-chain addresses by numeric chain ID:
+| Network | Chain ID | Batch contract | Deploy transaction |
+| --- | ---: | --- | --- |
+| Ethereum | 1 | `0xE5C25B629D9f96be224604e4c03305965357d7E4` | `0xe2a0141d12ac731daadb1af9a568ab0c74f1f089db380f63b53e12b16b5e0867` |
+| Base | 8453 | `0xE5C25B629D9f96be224604e4c03305965357d7E4` | `0x5524f340f09f2fc1c71ddd93e656e2144fbb8dd93810a52a58b028a67a0511bd` |
+| Ink | 57073 | `0xE5C25B629D9f96be224604e4c03305965357d7E4` | `0x0c2693825f5243a462f9c69a2c265b7fab97c4d7a40ffc5436aa3086bcd779ed` |
+| Arbitrum One | 42161 | `0xE5C25B629D9f96be224604e4c03305965357d7E4` | `0x119cb57378ede3bb36d36cb6eb3f35fd60916547f806f5109e617f70a8850c57` |
+| Arc Testnet | 5042002 | `0xE5C25B629D9f96be224604e4c03305965357d7E4` | - |
+| Base Sepolia | 84532 | `0xE5C25B629D9f96be224604e4c03305965357d7E4` | - |
 
-```bash
-VITE_BATCH_1=0x...
-VITE_BATCH_8453=0x...
-VITE_BATCH_42161=0x...
-```
-
-`VITE_BATCH_DISTRIBUTOR_ADDRESS` takes precedence over the per-chain variables so a CreateX deployment can keep the same contract address across every configured chain.
-
-USDC addresses for Circle-listed EVM mainnets and testnets are built in from Circle's official contract address list:
+USDC addresses for Circle-listed EVM mainnets and testnets are also built in from Circle's official contract address list:
 
 https://developers.circle.com/stablecoins/usdc-contract-addresses
-
-The selector only shows EVM chains with a configured USDC address. If Circle adds or changes an address before the local config is updated, set an override:
-
-```bash
-VITE_USDC_<CHAIN_ID>=0x...
-```
 
 `VITE_REOWN_PROJECT_ID` is required for Reown AppKit WalletConnect support.
 
@@ -80,7 +74,7 @@ Amounts are parsed as USDC with 6 decimals.
 1. Connect an injected EVM wallet.
 2. Select one blockchain network for the current batch run.
 3. Import or edit the `address,amount` CSV rows.
-4. Configure the shared CreateX batch contract address or a per-chain batch contract address.
+4. Review the built-in Batch contract address for the selected network.
 5. Read balance and allowance automatically, or refresh manually.
 6. Approve the remaining USDC amount when needed.
 7. Send the next transaction group or all remaining groups.

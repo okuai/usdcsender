@@ -1,7 +1,7 @@
 {
-  "name": "USDCSender - USDC Batch Sender",
-  "short_name": "USDCSender",
-  "description": "Send USDC to multiple EVM addresses in one focused batch payout workflow.",
+  "name": "USDC Sender - Batch USDC Payments",
+  "short_name": "USDC Sender",
+  "description": "Send USDC to multiple EVM addresses with recipient import, batch execution, and payout tracking.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

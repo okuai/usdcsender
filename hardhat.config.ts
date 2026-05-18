@@ -32,6 +32,30 @@ export default defineConfig({
       url: configVariable("ARC_TESTNET_RPC_URL"),
       accounts: [configVariable("DEPLOYER_PRIVATE_KEY")],
     },
+    ethereum: {
+      type: "http",
+      chainType: "l1",
+      url: configVariable("ETHEREUM_RPC_URL"),
+      accounts: [configVariable("DEPLOYER_PRIVATE_KEY")],
+    },
+    base: {
+      type: "http",
+      chainType: "op",
+      url: configVariable("BASE_RPC_URL"),
+      accounts: [configVariable("DEPLOYER_PRIVATE_KEY")],
+    },
+    ink: {
+      type: "http",
+      chainType: "generic",
+      url: configVariable("INK_RPC_URL"),
+      accounts: [configVariable("DEPLOYER_PRIVATE_KEY")],
+    },
+    arbitrumOne: {
+      type: "http",
+      chainType: "generic",
+      url: configVariable("ARBITRUM_ONE_RPC_URL"),
+      accounts: [configVariable("DEPLOYER_PRIVATE_KEY")],
+    },
     baseSepolia: {
       type: "http",
       chainType: "op",

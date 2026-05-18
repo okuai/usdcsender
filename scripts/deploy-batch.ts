@@ -8,4 +8,4 @@ console.log("BatchUSDCDistributor deployed");
 console.log("Deployer:", deployer.account.address);
 console.log("Address:", distributor.address);
 console.log("");
-console.log("Set the matching Vite env var or paste this address in the UI.");
+console.log("Add this address to batchDistributorAddressByChainId in src/config/chains.ts.");

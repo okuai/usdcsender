@@ -504,7 +504,8 @@
   color: var(--muted);
 }
 
-.circle-logo-icon {
+.circle-logo-icon,
+.chain-logo-icon {
   align-items: center;
   background: #ffffff;
   border: 1px solid rgba(39, 117, 202, 0.2);
@@ -518,7 +519,22 @@
   padding: 2px;
 }
 
-.circle-logo-icon img {
+.chain-logo-icon {
+  background: var(--chain-logo-bg, #ffffff);
+}
+
+.chain-logo-icon.fallback {
+  background: var(--chain);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+  padding: 0;
+}
+
+.circle-logo-icon img,
+.chain-logo-icon img {
   border-radius: 999px;
   display: block;
   height: 100%;
@@ -526,19 +542,31 @@
   width: 100%;
 }
 
-.circle-logo-lg {
+.chain-logo-icon span {
+  display: block;
+  line-height: 1;
+}
+
+.circle-logo-lg,
+.chain-logo-lg {
   height: 34px;
   width: 34px;
 }
 
-.circle-logo-md {
+.circle-logo-md,
+.chain-logo-md {
   height: 22px;
   width: 22px;
 }
 
-.circle-logo-sm {
+.circle-logo-sm,
+.chain-logo-sm {
   height: 18px;
   width: 18px;
+}
+
+.chain-logo-sm.fallback {
+  font-size: 8px;
 }
 
 .protocol-hero {
@@ -1370,9 +1398,14 @@ button:disabled {
 }
 
 .contract-strip svg,
-.contract-strip .circle-logo-icon {
+.contract-strip .circle-logo-icon,
+.contract-strip .chain-logo-icon {
   color: var(--chain);
   flex: 0 0 auto;
+}
+
+.contract-strip .chain-logo-icon.fallback {
+  color: #ffffff;
 }
 
 .metrics-grid {

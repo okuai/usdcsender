@@ -92,9 +92,13 @@ const hash = await deployer.writeContract({
 
 console.log("Deploy tx:", hash);
 
-await publicClient.waitForTransactionReceipt({ hash });
+const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-const deployedCode = await publicClient.getCode({ address: expectedAddress });
+if (receipt.status !== "success") {
+  throw new Error("Deployment transaction reverted");
+}
+
+const deployedCode = await waitForExpectedCode(expectedAddress);
 
 if (!deployedCode || deployedCode === "0x") {
   throw new Error("Deployment confirmed but no bytecode was found");
@@ -108,7 +112,7 @@ if (deployedHash !== runtimeHash) {
 
 console.log("Contract deployed:", expectedAddress);
 console.log("");
-console.log("Set the matching Vite env var or paste this address in the UI.");
+console.log("Add this address to batchDistributorAddressByChainId in src/config/chains.ts.");
 
 function buildCreateXSalt(deployerAddress: Address) {
   const entropy = keccak256(
@@ -116,4 +120,18 @@ function buildCreateXSalt(deployerAddress: Address) {
   ).slice(2, 24);
 
   return `${deployerAddress.toLowerCase()}00${entropy}` as Hex;
+}
+
+async function waitForExpectedCode(address: Address) {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const code = await publicClient.getCode({ address });
+
+    if (code && code !== "0x") {
+      return code;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+
+  return "0x";
 }

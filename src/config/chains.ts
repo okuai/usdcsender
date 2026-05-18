@@ -46,22 +46,23 @@ import {
   zkSyncSepoliaTestnet,
 } from 'viem/chains'
 import { http } from 'wagmi'
-import { defineChain, getAddress, isAddress } from 'viem'
+import { defineChain, isAddress } from 'viem'
 import type { Address } from 'viem'
 
 export type ChainSlug = string
 type NumericAppKitNetwork = AppKitNetwork & { id: number }
-type EnvMap = Record<string, string | undefined>
 
 export const createxFactoryAddress =
   '0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed' as Address
 
 type ChainConfig = {
   aliases: string[]
-  batchEnvAddress: string
+  batchAddress: string
   defaultBatchSize: number
   explorerTxBaseUrl: string
   id: number
+  iconBackgroundColor?: string
+  iconUrl: string
   name: string
   shortName: string
   slug: ChainSlug
@@ -71,9 +72,15 @@ type ChainConfig = {
 
 const reownProjectId = import.meta.env.VITE_REOWN_PROJECT_ID ?? ''
 const appUrl = 'https://usdcsender.xyz'
-const env = import.meta.env as EnvMap
-const sharedBatchEnvAddress =
-  import.meta.env.VITE_BATCH_DISTRIBUTOR_ADDRESS?.trim() ?? ''
+const reownAssetBaseUrl = 'https://api.web3modal.org/public/getAssetImage'
+const batchDistributorAddressByChainId: Record<number, Address> = {
+  1: '0xE5C25B629D9f96be224604e4c03305965357d7E4',
+  5_042_002: '0xE5C25B629D9f96be224604e4c03305965357d7E4',
+  8_453: '0xE5C25B629D9f96be224604e4c03305965357d7E4',
+  84_532: '0xE5C25B629D9f96be224604e4c03305965357d7E4',
+  42_161: '0xE5C25B629D9f96be224604e4c03305965357d7E4',
+  57_073: '0xE5C25B629D9f96be224604e4c03305965357d7E4',
+}
 
 // EVM USDC addresses from Circle's official "USDC Contract Addresses" page.
 // Entries without reliable AppKit-compatible chain metadata are intentionally
@@ -175,13 +182,43 @@ const circleChainRegistry: Array<[string, NumericAppKitNetwork]> = [
   ['zkSyncSepoliaTestnet', zkSyncSepoliaTestnet],
 ]
 
+const reownNetworkImageIdByChainId: Record<number, string> = {
+  1: 'ba0ba0cd-17c6-4806-ad93-f9d174f17900',
+  10: 'ab9c186a-c52f-464b-2906-ca59d760a400',
+  130: '2257980a-3463-48c6-cbac-a42d2a956e00',
+  137: '41d04d42-da3b-4453-8506-668cc0727900',
+  324: 'b310f07f-4ef7-49f3-7073-2a0a39685800',
+  1_301: '4eeea7ef-0014-4649-5d1d-07271a80f600',
+  8_453: '7289c336-3981-4081-c5f4-efc26ac64a00',
+  10_143: '0a728e83-bacb-46db-7844-948f05434900',
+  42_161: '3bff954d-5cb0-47a0-9a23-d20192e74600',
+  42_220: 'ab781bbc-ccc6-418d-d32d-789b15da1f00',
+  43_113: '30c46e53-e989-45fb-4549-be3bd4eb3b00',
+  43_114: '30c46e53-e989-45fb-4549-be3bd4eb3b00',
+  80_002: '41d04d42-da3b-4453-8506-668cc0727900',
+  84_532: 'a18a7ecd-e307-4360-4746-283182228e00',
+  111_551_111: 'e909ea0a-f92a-4512-c8fc-748044ea6800',
+  11_155_420: 'ab9c186a-c52f-464b-2906-ca59d760a400',
+  421_614: '3bff954d-5cb0-47a0-9a23-d20192e74600',
+}
+
+const chainIconOverrideByChainId: Record<
+  number,
+  { backgroundColor?: string; url: string }
+> = {
+  5_042_002: {
+    backgroundColor: '#111817',
+    url: 'https://cdn.prod.website-files.com/685311a976e7c248b5dfde95/699e21e934a48439675361dc_arc-icon.svg',
+  },
+}
+
 const defaultChainId = 1
 
 export const appChains = createAppChains()
 export const defaultChainSlug =
-  appChains.find((chain) => chain.id === defaultChainId && chain.batchEnvAddress)
+  appChains.find((chain) => chain.id === defaultChainId && chain.batchAddress)
     ?.slug ??
-  appChains.find((chain) => chain.batchEnvAddress)?.slug ??
+  appChains.find((chain) => chain.batchAddress)?.slug ??
   appChains.find((chain) => chain.id === defaultChainId)?.slug ??
   appChains[0].slug
 export const chainSlugs = appChains.map((chain) => chain.slug)
@@ -213,9 +250,9 @@ export const appKit = createAppKit({
   },
   metadata: {
     description:
-      'USDCSender helps EVM wallet users send USDC to many addresses in one batch workflow.',
+      'USDC Sender helps EVM wallet users send USDC to many addresses in one batch workflow.',
     icons: [`${appUrl}/favicon.svg`],
-    name: 'USDCSender',
+    name: 'USDC Sender',
     url: appUrl,
   },
   networks: appKitNetworks,
@@ -283,10 +320,12 @@ function createAppChains(): ChainConfig[] {
 
       return {
         aliases: createChainAliases(chain, exportNames, names, slug),
-        batchEnvAddress: resolveBatchEnvAddress(chain.id),
+        batchAddress: resolveBatchAddress(chain.id),
         defaultBatchSize: 100,
         explorerTxBaseUrl: explorerBaseUrl ? `${explorerBaseUrl}/tx` : '',
         id: chain.id,
+        iconBackgroundColor: resolveChainIconBackgroundColor(chain.id),
+        iconUrl: resolveChainIconUrl(chain.id),
         name: chain.name,
         shortName: createShortName(chain.name),
         slug,
@@ -295,6 +334,32 @@ function createAppChains(): ChainConfig[] {
       }
     },
   ).filter((chain) => Boolean(chain.usdcAddress))
+}
+
+function resolveChainIconUrl(chainId: number) {
+  const override = chainIconOverrideByChainId[chainId]
+
+  if (override) {
+    return override.url
+  }
+
+  const imageId = reownNetworkImageIdByChainId[chainId]
+
+  if (!imageId || !reownProjectId) {
+    return ''
+  }
+
+  const url = new URL(`${reownAssetBaseUrl}/${imageId}`)
+
+  url.searchParams.set('projectId', reownProjectId)
+  url.searchParams.set('st', 'appkit')
+  url.searchParams.set('sv', 'html-wagmi-4.2.2')
+
+  return url.toString()
+}
+
+function resolveChainIconBackgroundColor(chainId: number) {
+  return chainIconOverrideByChainId[chainId]?.backgroundColor
 }
 
 function createUniqueSlug(name: string, usedSlugs: Map<string, number>) {
@@ -338,27 +403,12 @@ function createShortName(name: string) {
     .slice(0, 18) || name.slice(0, 18)
 }
 
-function resolveBatchEnvAddress(chainId: number) {
-  return firstConfiguredAddress([
-    sharedBatchEnvAddress,
-    env[`VITE_BATCH_${chainId}`],
-  ])
+function resolveBatchAddress(chainId: number) {
+  return batchDistributorAddressByChainId[chainId] ?? ''
 }
 
 function resolveUsdcAddress(chainId: number): Address | null {
-  return firstConfiguredAddress([
-    env[`VITE_USDC_${chainId}`],
-    circleUsdcAddressByChainId[chainId],
-  ]) || null
-}
-
-function firstConfiguredAddress(values: Array<string | undefined>): Address | '' {
-  const value = values.find((item) => {
-    const trimmed = item?.trim()
-    return trimmed ? isAddress(trimmed) : false
-  })
-
-  return value ? getAddress(value.trim()) : ''
+  return circleUsdcAddressByChainId[chainId] ?? null
 }
 
 function isNumericAppKitNetwork(value: unknown): value is NumericAppKitNetwork {

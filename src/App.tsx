@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { ChangeEvent, ReactNode } from 'react'
+import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
 import {
   AlertTriangle,
   BookOpen,
@@ -1106,7 +1106,7 @@ function App() {
           </span>
           <div>
             <p className="eyebrow">USDC batch sender</p>
-            <h1>USDCSender</h1>
+            <h1>USDC Sender</h1>
           </div>
         </div>
         <div className="topbar-actions">
@@ -1315,7 +1315,7 @@ function App() {
               <div className="chain-title-row">
                 <div className="panel-heading">
                   <span className="section-icon section-icon-blue">
-                    <CircleLogoIcon size="sm" />
+                    <ChainLogoIcon chain={selectedSummary.chain} size="sm" />
                   </span>
                   <div>
                     <p className="eyebrow">{selectedSummary.chain.shortName}</p>
@@ -1342,7 +1342,7 @@ function App() {
                     : 'not configured'}
                 </span>
                 <span>
-                  <CircleLogoIcon size="sm" />
+                  <ChainLogoIcon chain={selectedSummary.chain} size="sm" />
                   Contract{' '}
                   {selectedSummary.contractAddress
                     ? shortAddress(selectedSummary.contractAddress)
@@ -1560,7 +1560,7 @@ function ChainSelector({
         }}
       >
         <span className="chain-selector-trigger-main">
-          <CircleLogoIcon size="md" />
+          <ChainLogoIcon chain={selectedChain} size="md" />
           <span className="chain-selector-copy">
             <strong>{selectedChain.name}</strong>
           </span>
@@ -1654,7 +1654,7 @@ function ChainSelector({
                   role="option"
                 >
                   <span className="chain-option-main">
-                    <CircleLogoIcon size="md" />
+                    <ChainLogoIcon chain={chain} size="md" />
                     <span className="chain-option-copy">
                       <span className="chain-option-title">
                         <strong>{chain.name}</strong>
@@ -2117,6 +2117,69 @@ function CircleLogoIcon({ size = 'md' }: { size?: 'lg' | 'md' | 'sm' }) {
   )
 }
 
+function ChainLogoIcon({
+  chain,
+  size = 'md',
+}: {
+  chain: {
+    iconBackgroundColor?: string
+    iconUrl: string
+    name: string
+    shortName: string
+  }
+  size?: 'lg' | 'md' | 'sm'
+}) {
+  const [failedIconUrl, setFailedIconUrl] = useState('')
+  const showImage = Boolean(chain.iconUrl) && failedIconUrl !== chain.iconUrl
+  const style = chain.iconBackgroundColor
+    ? ({
+        '--chain-logo-bg': chain.iconBackgroundColor,
+      } as CSSProperties)
+    : undefined
+
+  return (
+    <span
+      className={
+        showImage
+          ? `chain-logo-icon chain-logo-${size} has-image`
+          : `chain-logo-icon chain-logo-${size} fallback`
+      }
+      style={style}
+      aria-hidden="true"
+    >
+      {showImage ? (
+        <img
+          src={chain.iconUrl}
+          alt=""
+          draggable={false}
+          onError={() => setFailedIconUrl(chain.iconUrl)}
+        />
+      ) : (
+        <span>{getChainLogoInitials(chain.shortName || chain.name)}</span>
+      )}
+    </span>
+  )
+}
+
+function getChainLogoInitials(label: string) {
+  const parts = label
+    .replace(/\b(testnet|sepolia|mainnet|network)\b/gi, '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+
+  return (
+    parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join('') || label.slice(0, 2).toUpperCase()
+  )
+}
+
 function Metric({
   icon,
   label,
@@ -2380,7 +2443,7 @@ function getBatchAddress(
   addressOverrides: AddressOverrides,
 ): Address | null {
   const configured =
-    getChainConfig(slug).batchEnvAddress || (addressOverrides[slug] ?? '').trim()
+    getChainConfig(slug).batchAddress || (addressOverrides[slug] ?? '').trim()
 
   if (!configured || !isConfiguredAddress(configured)) {
     return null
