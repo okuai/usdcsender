@@ -57,8 +57,7 @@ The Recipients editor uses this format:
 
 ```csv
 address,amount
-0xdc6456cb17ad2eb83f30661ad0559b137f956f39,1.25
-0x4740aff788d498c7d3b9d8a433e098867c774438,0.5
+0x000000000000000000000000000000000000dEaD,0.01
 ```
 
 Each batch run is limited to one selected blockchain network. Recipients do not include a chain column; the chain selector decides the target chain for every row.
