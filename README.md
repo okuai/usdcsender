@@ -20,16 +20,16 @@ npm run dev
 
 ## Deploy Batch Contract
 
-Set the matching RPC URL and `DEPLOYER_PRIVATE_KEY` in `.env`, then run one deploy per target network. Mainnet targets are configured for Ethereum, Base, Ink, and Arbitrum One, plus the testnet validation set.
+Keep `DEPLOYER_PRIVATE_KEY` in `.env`, then inject the matching RPC URL only for the deploy command you are running. Mainnet targets are configured for Ethereum, Base, Ink, and Arbitrum One, plus the testnet validation set.
 
 ```bash
-npm run deploy:batch:createx -- --network ethereum
-npm run deploy:batch:createx -- --network base
-npm run deploy:batch:createx -- --network ink
-npm run deploy:batch:createx -- --network arbitrumOne
-npm run deploy:batch:createx -- --network arcTestnet
-npm run deploy:batch:createx -- --network baseSepolia
-npm run deploy:batch:createx -- --network ethereumSepolia
+ETHEREUM_RPC_URL=https://... npm run deploy:batch:createx -- --network ethereum
+BASE_RPC_URL=https://... npm run deploy:batch:createx -- --network base
+INK_RPC_URL=https://... npm run deploy:batch:createx -- --network ink
+ARBITRUM_ONE_RPC_URL=https://... npm run deploy:batch:createx -- --network arbitrumOne
+ARC_TESTNET_RPC_URL=https://... npm run deploy:batch:createx -- --network arcTestnet
+BASE_SEPOLIA_RPC_URL=https://... npm run deploy:batch:createx -- --network baseSepolia
+ETHEREUM_SEPOLIA_RPC_URL=https://... npm run deploy:batch:createx -- --network ethereumSepolia
 ```
 
 Batch contract addresses are built into `src/config/chains.ts` by numeric chain ID. Update `batchDistributorAddressByChainId` after deploying a supported network.
