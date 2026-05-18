@@ -313,8 +313,8 @@ function createAppChains(): ChainConfig[] {
       })
     })
 
-  return Array.from(chainGroups.values()).map(
-    ({ chain, exportNames, names }) => {
+  return Array.from(chainGroups.values())
+    .map(({ chain, exportNames, names }) => {
       const slug = createUniqueSlug(chain.name, usedSlugs)
       const explorerBaseUrl = chain.blockExplorers?.default?.url?.replace(/\/+$/, '')
 
@@ -332,8 +332,9 @@ function createAppChains(): ChainConfig[] {
         usdcAddress: resolveUsdcAddress(chain.id),
         wagmiChain: chain,
       }
-    },
-  ).filter((chain) => Boolean(chain.usdcAddress && chain.batchAddress))
+    })
+    .filter((chain) => Boolean(chain.usdcAddress && chain.batchAddress))
+    .sort((left, right) => left.id - right.id)
 }
 
 function resolveChainIconUrl(chainId: number) {
